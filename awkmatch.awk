@@ -22,7 +22,8 @@
 #
 #		Note: In case of contradictory flags, the default case is used 
 
-FNR == NR #1st file - Patterns
+# 1st file - Patterns
+FNR == NR 
 {
 	patternIntegrityCheck($0);
 	if(NF==2)
@@ -33,12 +34,16 @@ FNR == NR #1st file - Patterns
 		else 					patternFlags[NR,"noRegex"]		= 0;
 		if(match($1,"v"))			patternFlags[NR,"inverseMatch"]		= 1;
 		else 					patternFlags[NR,"inverseMatch"]		= 0;
+
+		pattern[NR] = $2
 	}
 	else if(NF==1)
 	{
 		patternFlags[NR,"caseInsensitive"]	= 0;
 		patternFlags[NR,"noRegex"]		= 0;
 		patternFlags[NR,"inverseMatch"]		= 0;
+
+		pattern[NR] = $1
 	}
 	else
 	{
@@ -46,12 +51,35 @@ FNR == NR #1st file - Patterns
 		next;
 	}
 }
+# Other files - Data to be processed
+FNR < NR 
+{
+	# Match every pattern on each line and skip lines that don't match
+	for(line = 1; line <= patternLines; line++)
+	{
+		if(patternFlags[line, "noRegex"]) 		linePattern = "\<" pattern[line] "\>";
+		else 						linePattern = pattern[line];
+		if(patternFlags[line, "caseInsensitive"]) { 	lineText = tolower($0); linePattern = tolower(linePattern);}
+		else 						lineText = $0;
+		if(patternFlags[line, "inverseMatch"])		matchResult = (lineText !~ linePattern);
+		else						matchResult = (lineText ~ linePattern); 
 
+		# Is this really necessary?
+		if(!matchResult) break;
+	}
+		if(!matchResult) next;
+		displayResults();
+}
+END
+{
+	if(FNR==NR) patternLines = NR;
+}
 function errorHandler(message, severity)
 {
 
+}
 
-function multimatch(line)
+function displayResults()
 {
 
 }
