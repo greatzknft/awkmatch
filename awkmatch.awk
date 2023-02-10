@@ -2,7 +2,7 @@
 
 # AWKmatch: 	A multi-pattern text matching tool to replace clumsy grep piping.
 #		For the matches, simply use the first field as an option specifier (see flags below) and the second as the match itself.
-#
+#		A line of text is only matched if it matches all of the patterns (AND matching). OR matching is a future possibility.
 #		Note: If you only use one field, it will be interpreted as a pattern to match with default flags
 #
 # CLI Switches:
@@ -14,7 +14,8 @@
 #
 # Pattern modifiers in match file:
 #
-#		e - Regex (default)
+#		e - OR match (will not be implemented for now, future consideration)
+#		R - Regex (default)
 #		f - Exact match
 #		i - Case insensitive 
 #		I - Case sensitive (default)
@@ -57,12 +58,16 @@ FNR < NR
 	# Match every pattern on each line and skip lines that don't match
 	for(line = 1; line <= patternLines; line++)
 	{
-		if(patternFlags[line, "noRegex"]) 		linePattern = "\<" pattern[line] "\>";
-		else 						linePattern = pattern[line];
-		if(patternFlags[line, "caseInsensitive"]) { 	lineText = tolower($0); linePattern = tolower(linePattern);}
-		else 						lineText = $0;
-		if(patternFlags[line, "inverseMatch"])		matchResult = (lineText !~ linePattern);
-		else						matchResult = (lineText ~ linePattern); 
+		if(patternFlags[line, "noRegex"]) 		linePattern	= "\<" pattern[line] "\>";
+		else 						linePattern	= pattern[line];
+		if(patternFlags[line, "caseInsensitive"])
+		{
+								lineText	= tolower($0);
+								linePattern 	= tolower(linePattern);
+		}
+		else 						lineText	= $0;
+		if(patternFlags[line, "inverseMatch"])		matchResult	= (lineText !~ linePattern);
+		else						matchResult	= (lineText ~ linePattern); 
 
 		# Is this really necessary?
 		if(!matchResult) break;
