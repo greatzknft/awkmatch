@@ -25,15 +25,31 @@
 FNR == NR #1st file - Patterns
 {
 	patternIntegrityCheck($0);
-	if(NF<=2 && NF >= 1)			field = $NF;
-	else 					ERROR_PLACEHOLDER;
-	if(match($1,"i") && !match($1,"I")) 	patternFlags[NR,"caseInsensitive"] = 1;
-	else 					patternFlags[NR,"caseInsensitive"] = 0;
-	if(match($1,"f") && !match($1,"e")) 	patternFlags[NR,"noRegex"] = 1;
-	else 					patternFlags[NR,"noRegex"] = 0;
-	if(match($1,"v"))			patternFlags[NR,"inverseMatch"] = 1;
-	else 					patternFlags[NR,"inverseMatch"] = 0;
+	if(NF==2)
+	{
+		if(match($1,"i") && !match($1,"I")) 	patternFlags[NR,"caseInsensitive"]	= 1;
+		else 					patternFlags[NR,"caseInsensitive"]	= 0;
+		if(match($1,"f") && !match($1,"e")) 	patternFlags[NR,"noRegex"]		= 1;
+		else 					patternFlags[NR,"noRegex"]		= 0;
+		if(match($1,"v"))			patternFlags[NR,"inverseMatch"]		= 1;
+		else 					patternFlags[NR,"inverseMatch"]		= 0;
+	}
+	else if(NF==1)
+	{
+		patternFlags[NR,"caseInsensitive"]	= 0;
+		patternFlags[NR,"noRegex"]		= 0;
+		patternFlags[NR,"inverseMatch"]		= 0;
+	}
+	else
+	{
+		errorHandler("Invalid number of fields in match file (line #" NR")", WARNING);
+		next;
+	}
 }
+
+function errorHandler(message, severity)
+{
+
 
 function multimatch(line)
 {
