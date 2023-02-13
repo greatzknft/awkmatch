@@ -23,6 +23,15 @@
 #
 #		Note: In case of contradictory flags, the default case is used 
 
+# Defines global constants
+BEGIN
+{
+	# Placeholder for flag parsing
+	
+	INFO		= 1;
+	WARNING 	= 2;
+	FATAL		= 4;
+}
 # 1st file - Patterns
 FNR == NR 
 {
@@ -73,7 +82,7 @@ FNR < NR
 		if(!matchResult) break;
 	}
 		if(!matchResult) next;
-		displayResults();
+		displayResults($0);
 }
 END
 {
@@ -81,10 +90,13 @@ END
 }
 function errorHandler(message, severity)
 {
-
+	print message;
+	if(severity == FATAL) exit(WARNING); 
 }
 
-function displayResults()
+function displayResults(line)
 {
-
+	if(displayFlags["filename"])	line = FILENAME line;  	
+	if(displayFlags["linenumber"])	line = FNR line;  	
+	print line; 	
 }
