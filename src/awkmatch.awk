@@ -81,8 +81,7 @@ FNR < NR
 		# Is this really necessary?
 		if(!matchResult) break;
 	}
-		if(!matchResult) next;
-		displayResults($0);
+		if(matchResult) displayResults($0);
 }
 END
 {
