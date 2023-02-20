@@ -1,6 +1,7 @@
 #!/usr/bin/gawk -f
 
 # AWKmatch: 	A multi-pattern text matching tool to replace clumsy grep piping.
+#		For the first file use the match file. The following files will be matched accordingly.
 #		For the matches, simply use the first field as an option specifier (see flags below) and the second as the match itself.
 #		A line of text is only matched if it matches all of the patterns (AND matching). OR matching is a future possibility.
 #		Note: If you only use one field, it will be interpreted as a pattern to match with default flags
@@ -24,17 +25,21 @@
 #		Note: In case of contradictory flags, the default case is used 
 
 # Defines global constants
-BEGIN
+BEGIN						\
 {
 	# Placeholder for flag parsing
+	DEFAULT_MATCH_IFS = "§";
+	IFS = "";
 	
 	INFO		= 1;
 	WARNING 	= 2;
 	FATAL		= 4;
 }
 # 1st file - Patterns
-FNR == NR 
+FNR == NR 					\
 {
+	if(IFS == "") IFS = DEFAULT_MATCH_IFS;
+
 	patternIntegrityCheck($0);
 	if(NF==2)
 	{
@@ -62,12 +67,12 @@ FNR == NR
 	}
 }
 # Other files - Data to be processed
-FNR < NR 
+FNR < NR 					\
 {
 	# Match every pattern on each line and skip lines that don't match
 	for(line = 1; line <= patternLines; line++)
 	{
-		if(patternFlags[line, "noRegex"]) 		linePattern	= "\<" pattern[line] "\>";
+		if(patternFlags[line, "noRegex"]) 		linePattern	= "\\<" pattern[line] "\\>";
 		else 						linePattern	= pattern[line];
 		if(patternFlags[line, "caseInsensitive"])
 		{
@@ -83,19 +88,27 @@ FNR < NR
 	}
 		if(matchResult) displayResults($0);
 }
-END
+
+END						\
 {
 	if(FNR==NR) patternLines = NR;
 }
+
 function errorHandler(message, severity)
 {
+	# Should be replaced with ERRNO
 	print message;
 	if(severity == FATAL) exit(WARNING); 
 }
 
-function displayResults(line)
+function displayResults(line,	prefix)
 {
-	if(displayFlags["filename"])	line = FILENAME line;  	
-	if(displayFlags["linenumber"])	line = FNR line;  	
-	print line; 	
+	if(displayFlags["filename"])	prefix = prefix FILENAME ":";  	
+	if(displayFlags["linenumber"])	prefix = prefix FNR ":\t";  	
+	print prefix line; 	
+}
+
+function patternIntegrityCheck(line)
+{
+	#Placeholder
 }

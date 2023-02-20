@@ -1,0 +1,4 @@
+vR	§(#|(\/\/))
+Ri	§[a-z]\s*[0-9]
+fiv	§turi
+fI	§Alpha

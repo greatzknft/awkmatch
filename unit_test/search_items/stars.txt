@@ -1,0 +1,6 @@
+# This is a comment, it should not be matched with the current rules
+
+This ruleset will match a line with the text Alpha09,
+as well as Alpha 09.
+However it won't match alpha09.
+It also won't match Alpha Centuri 27
